@@ -1,0 +1,255 @@
+---
+title: "GeorgeFisher_HSE711_Final_Project"
+author: "George Gregory Fisher"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, LoadLibraries, message=FALSE, warning=FALSE}
+library(tidyverse)
+```
+
+```{r, LoadData, message=FALSE, warning=FALSE}
+
+# Read in both data sets
+count.df <- read.csv(file = "data/counts.csv", header = TRUE)
+meta_data.df <- read.csv(file = "data/meta_data.csv", header = TRUE)
+
+
+```
+
+```{r}
+gene_ensembl_map <- tibble(
+  gene_symbols = c(
+    "BRCA1",
+    "BRCA2",
+    "PALB2",
+    "BARD1",
+    "RAD51C",
+    "RAD51D",
+    "BRIP1",
+    "ATM",
+    "CHEK2",
+    "CDK12"
+  ),
+  ensembl.ids = c(
+    "ENSG00000012048",
+    "ENSG00000139618",
+    "ENSG00000083093",
+    "ENSG00000138376",
+    "ENSG00000108384",
+    "ENSG00000185379",
+    "ENSG00000136492",
+    "ENSG00000149311",
+    "ENSG00000183765",
+    "ENSG00000167258"
+  )
+)
+```
+
+```{r}
+# Rename the first column of the counts data
+names(count.df)[1] <- "gene_symbols"
+
+# Store the sample identifiers from the count.df
+sample_ids <- names(count.df)[-1]
+```
+
+```{r}
+# Remove the version suffix of the Ensembl identifier
+count.df <- count.df %>%
+  mutate(
+    ensembl.ids = str_remove(gene_symbols, "\\..*$")
+  )
+
+```
+
+
+```{r}
+
+heatmap_counts <- count.df %>%
+  filter(
+    ensembl.ids %in% gene_ensembl_map$ensembl.ids
+    ) %>%
+  select(
+    ensembl.ids,
+    all_of(sample_ids)
+  ) %>%
+    arrange(
+      match(
+        ensembl.ids,
+        gene_ensembl_map$ensembl.ids
+      )
+)
+```
+
+```{r}
+# Verify that all counts_data sample identifiers are present in the barcode meta_data field
+all(sample_ids %in% meta_data.df$barcode)
+```
+
+```{r}
+
+count.matrix <- as.matrix(
+  heatmap_counts %>%
+    select(all_of(sample_ids))
+)
+
+```
+
+```{r}
+rownames(count.matrix) <- gene_ensembl_map$gene_symbols[
+  match(
+    heatmap_counts$ensembl.ids,
+    gene_ensembl_map$ensembl.ids
+  )
+]
+```
+
+```{r}
+
+meta_data.df <- meta_data.df %>%
+  # The barcode variable will eventually be used to join the metadata to the count data
+  # The hyphen in the barcode variable needs to be changed to a dot
+  mutate(barcode = str_replace_all(barcode, "-", "."))
+
+```
+
+
+```{r}
+heatmap_metadata <- meta_data.df %>%
+  select(
+    barcode,
+    PAM50_Subtype = paper_BRCA_Subtype_PAM50
+  ) %>%
+  filter(
+    barcode %in% colnames(count.matrix),
+    !is.na(PAM50_Subtype)
+  ) %>%
+  distinct(
+    barcode,
+    .keep_all = TRUE
+  ) %>%
+  mutate(
+    PAM50_Subtype = factor(
+      PAM50_Subtype,
+      levels = c(
+        "Basal",
+        "Her2",
+        "LumA",
+        "LumB",
+        "Normal"
+      ),
+      labels = c(
+        "Basal",
+        "Her2-enriched",
+        "Luminal A",
+        "Luminal B",
+        "Normal"
+      )
+    )
+  ) %>%
+  arrange(PAM50_Subtype)
+```
+
+```{r, HeatmapLibraries, message=FALSE, warning=FALSE}
+library(ComplexHeatmap)
+library(circlize)
+```
+
+```{r}
+count.matrix <- count.matrix[
+  ,
+  heatmap_metadata$barcode,
+  drop = FALSE
+]
+
+class(count.matrix) <- "numeric" # enforce numeric mode if needed
+
+log2_count_matrix <- log2(count.matrix)
+
+```
+
+
+```{r}
+# standardize each gene across samples using row Z-scores
+scaled_count_matrix <- t(
+  scale(
+    t(log2_count_matrix)
+  )
+)
+```
+
+```{r}
+
+# standardize each gene across samples using row Z-scores
+scaled_count_matrix <- t(
+  scale(
+    t(log2_count_matrix)
+  )
+)
+
+```
+
+```{r}
+subtype_colors <- c(
+      "Basal" =         "#D55E00",
+      "HER2-Enriched" = "#CC79A7",
+      "Luminal A" =     "#009E73",
+      "Luminal B" =     "#E69F00",
+      "Normal" =        "#5684E9"
+      )
+```
+
+```{r}
+subtype_annotation <- HeatmapAnnotation(
+  `PAM50 subtype` = heatmap_metadata$PAM50_Subtype,
+   col = list(
+    `PAM50_subtype` = subtype_colors
+   ),
+   annotation_name_side = "left"
+)
+```
+
+```{r}
+heatmap_colors <- colorRamp2(
+  c(-2,0,2),
+  c("#2166AC", "white", "#B2182B")
+)
+```
+
+```{r}
+gene_heatmap <- Heatmap(
+  scaled_count_matrix,
+  name = "Gene Expression",
+  col = heatmap_colors,
+  top_annotation = subtype_annotation,
+  column_split = heatmap_metadata$PAM50_Subtype,
+  cluster_rows = TRUE,
+  cluster_columns = TRUE,
+  cluster_column_slices = FALSE,
+  show_column_names = FALSE,
+  show_row_names = TRUE,
+  row_names_side = "left",
+  row_names_gp = gpar(fontsize = 8),
+  row_title = "Selected Genes",
+  column_title = "Samples Grouped by PAM50 Subtype",
+  use_raster = FALSE,
+  heatmap_legend_param = list(
+    title = "Expression\nZ-score"
+  )
+)
+```
+
+```{r}
+draw(
+  gene_heatmap,
+  heatmap_legend_side = "right",
+  annotation_legend_side = "right"
+)
+```
+
