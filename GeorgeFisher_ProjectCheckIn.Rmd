@@ -203,7 +203,6 @@ dat.long.genes %>%
                 x = "BRCA1 RNA-sequencing Counts",
                 y = "BRCA2 RNA-sequencing Counts"
              ) +
-             #theme_minimal() +
              theme(
                  plot.title = element_text(
                  face = "bold",
@@ -215,7 +214,7 @@ dat.long.genes %>%
   )
 ```
 \newpage
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, fig.width=8, fig.height=6, out.width="90%}
 # c) Create a Violin Plot: Select one covariate from your metadata. Using the count data from 
 # the first gene and the selected covariate, generate a violin plot that illustrates the 
 # distribution of count data based on the covariate. For example, if you choose 
@@ -225,13 +224,32 @@ dat.long.genes %>%
 dat.long.genes %>%
   filter(gene_symbols == 'BRCA1') %>%
   filter(!is.na(ajcc_pathologic_stage)) %>%
-  ggplot(., aes(x=ajcc_pathologic_stage,y=Counts)) +
-  geom_violin(fill = "skyblue", color = "darkblue", linewidth = 0.8) +
+  ggplot(., aes(x=ajcc_pathologic_stage,y=Counts, fill = ajcc_pathologic_stage)) +
+  geom_violin(alpha = 0.6) +  #Legend title) +
+  scale_fill_manual(
+    values = c(
+      "Stage 0" = "aliceblue",
+      "Stage I" = "antiquewhite",
+      "Stage IA" = "aquamarine",
+      "Stage IB" = "azure3",
+      "Stage II" = "bisque4",
+      "Stage IIA" = "brown1",
+      "Stage IIB" = "cornflowerblue",
+      "Stage IIIA" = "darkgreen",
+      "Stage IIIB" = "darksalmon",
+      "Stage IIIC" = "deeppink",
+      "Stage IV" = "deepskyblue1",
+      "Stage X" = "darkorange"
+    ) 
+  ) +
   labs(
     title = "Distribution of BRCA1 Gene Counts by Stage",
     x = "AJCC Pathological Stage",
-    y = "Count (Frequency)"
-  ) + 
+    y = "Counts",
+    fill = "Stage"
+  ) +
+  scale_y_log10(labels = scales::comma) +
+  annotation_logticks() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 
 ```
