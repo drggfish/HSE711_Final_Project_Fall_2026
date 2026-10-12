@@ -313,6 +313,8 @@ meta_data.df.corrected_2 <- meta_data.df %>%
 
 ```{r, message=FALSE, warning=FALSE}
 meta_data.df.corrected_2 <- meta_data.df.corrected_2 %>% mutate(barcode = str_replace_all(barcode, "-", "."))
+
+meta_data.df.corrected_2 %>% arrange(treatment_method)
 ```
 
 ```{r, message=FALSE, warning=FALSE}
@@ -334,71 +336,6 @@ ggplot(df3, aes(x = treatment_method, y = mean_value, fill = Gene)) +
 
 
 \newpage
-
-```{r, message=FALSE, warning=FALSE}
-# d)	Heatmap Analysis: 
-# i)	Select 10 genes: Choose a set of 10 different genes from the count matrix for your heatmap.
-# ii)	Generate a Heatmap: Use the ComplexHeatmap package in R to create a heatmap of the count data 
-   #  for the selected genes. 
-# iii)	Add an Annotation Bar: Include an annotation bar reflecting your chosen covariate for further              context and interpretation of the data.
-
-# An R package available via Bioconductor designed for creating highly customizable, 
-# complex heatmaps and arranging multiple heatmaps with rich annotation graphics
-library(ComplexHeatmap)
-# The circlize package provides an implementation of circular layout generation in R as well as an  
-# enhancement of available software
-library(circlize)
-
-# When creating an annotation metadata dataframe (df) for ComplexHeatmap, its dimensions
-# must precisely match the primary data matrix along the specific axis you are annotating
-# Number of Rows (nrow(df)): Must exactly equal the number of columns (ncol(matrix)) 
-# of the main matrix. Number of Columns (ncol(df)): Represents the number of annotation 
-# tracks (variables) you want to display alongside the columns
-count.df.subset <- count.df[1:10,1:11]
-count.df.subset <- count.df.subset[-1]
-
-meta_data.df.correct <- meta_data.df %>%
-  mutate(barcode = str_replace_all(barcode, "-", "."))
-
-meta_data.df.correct <- meta_data.df.correct[1:10,]
-
-```
-
-```{r, message=FALSE, warning=FALSE}
-# Create the Heatmap annotations using the HeatmapAnnotation function from the
-# ComplexHeatmap package. Creates metadata annotations to display alongside the 
-# rows or columns of a heatmap 
-column_ha <- HeatmapAnnotation(
-  Disease_Status = meta_data.df.correct$ajcc_pathologic_stage,
-  Laterality = meta_data.df.correct$laterality,
-  col = list(  # Color coded of mappings for each category being displayed
-    Disease_Status = c("Stage I" = "red", "Stage IA" = "blue", "Stage IIA" = "green",
-                       "Stage IIB" = "yellow", "Stage IIIA" = "brown", "Stage IIIC" = "gray"),
-    Laterality = c(Left = "green", Right = "purple")
-  )
-)
-
-```
-
-```{r, message=FALSE, warning=FALSE}
-
-# Create heatmap using Heatmap function from ComplexHeatMap package
-Heatmap(
-  count.df.subset, # count data
-  name = "Counts",
-  top_annotation = column_ha, # Annotations
-  #show_row_names = TRUE,
-  show_row_names = FALSE,
-  #show_column_names = FALSE,
-  show_column_names = TRUE,
-  cluster_columns = TRUE, # whether to make cluster on columns
-  cluster_rows = TRUE, # whether to make cluster on rows
-  column_title = "Samples", # Add main title
-  row_title = "Genes", # Add row title
-  heatmap_legend_param = list(title = "Count") # Add legend title
-)
-
-```
 
 ### New Heatmap
 
@@ -458,10 +395,10 @@ annotated_heatmap <- Heatmap(
   clustering_method_rows = "ward.D2",
   clustering_distance_columns = "spearman",
   clustering_method_columns = "ward.D2",
-  
+  column_split = meta_data.df.corrected_2$treatment_method,
   #col = colour_list,
   
-  #top_annotation = top_ann,
+  top_annotation = top_ann,
   bottom_annotation = bottom_ann,
   
   show_row_names = TRUE,
