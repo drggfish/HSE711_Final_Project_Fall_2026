@@ -255,6 +255,85 @@ dat.long.genes %>%
 ```
 \newpage
 
+```{r, DataLoad, message=FALSE, warning=FALSE}
+count.df <- read.csv(file = "data/counts.csv", header = TRUE,row.names = 1)
+meta_data.df <- read.csv(file = "data/meta_data.csv", header = TRUE)
+```
+
+```{r, DataWrangling, message=FALSE, warning=FALSE}
+
+# Recommended 10-gene core BRCA/HR variant panel For mutation/variant analysis
+genes.of.interest <- c("ENSG00000012048.23","ENSG00000139618.16",
+                       "ENSG00000083093.10","ENSG00000138376.11",
+                       "ENSG00000108384.15", "ENSG00000185379.20",
+                       "ENSG00000136492.9", "ENSG00000149311.19",
+                       "ENSG00000183765.23", "ENSG00000167258.15")
+
+count.df.subset <- count.df %>%
+  filter(rownames(.) %in% genes.of.interest)
+
+count.df.matrix <- as.matrix(count.df.subset[,])
+
+# Rename from Ensebml ID to Gene
+rownames(count.df.matrix) <- c("BRCA1", "BRCA2", "PALB2", "BARD1", "RAD51C",
+                               "RAD51D", "BRIP1", "ATM", "CHEK2", "CDK12")
+
+rownames(count.df.subset) <- c("BRCA1", "BRCA2", "PALB2", "BARD1", "RAD51C",
+                               "RAD51D", "BRIP1", "ATM", "CHEK2", "CDK12")
+
+```
+
+```{r, message=FALSE, warning=FALSE}
+count.df.subset %>% 
+  mutate(row_mean = rowMeans(select(., where(is.numeric)), na.rm = TRUE)) %>%
+  select(last_col())
+```
+
+```{r, message=FALSE, warning=FALSE}
+count.df.subset.long <- count.df.subset %>%
+  tibble::rownames_to_column(var = "Gene") %>% 
+  pivot_longer(
+    cols = -Gene, 
+    names_to = "Sample", 
+    values_to = "Counts"
+  )
+```
+
+```{r, message=FALSE, warning=FALSE}
+# Define your target strings
+targets <- c("Adjuvant", "Anastrozole", "First-Line Therapy", "Carboplatin","Paclitaxel")
+pattern <- paste(targets, collapse = "|")
+
+# Extract the matching string into a new column
+meta_data.df.corrected_2 <- meta_data.df %>% 
+  mutate(treatment_method = str_extract(treatments, pattern))
+```
+
+
+```{r, message=FALSE, warning=FALSE}
+meta_data.df.corrected_2 <- meta_data.df.corrected_2 %>% mutate(barcode = str_replace_all(barcode, "-", "."))
+```
+
+```{r, message=FALSE, warning=FALSE}
+count.df.subset.enriched <- count.df.subset.long %>%
+  inner_join(., meta_data.df.corrected_2, by = c("Sample" = "barcode"))
+```
+
+```{r}
+df3 <- count.df.subset.enriched %>%
+  group_by(sample_type, Gene, treatment_method) %>%
+  summarise(mean_value = mean(Counts, na.rm = TRUE))
+```
+
+```{r}
+ggplot(df3, aes(x = treatment_method, y = mean_value, fill = Gene)) +
+  geom_boxplot(position = "dodge") +
+  scale_y_continuous(limits = c(0, 10000))
+```
+
+
+\newpage
+
 ```{r, message=FALSE, warning=FALSE}
 # d)	Heatmap Analysis: 
 # i)	Select 10 genes: Choose a set of 10 different genes from the count matrix for your heatmap.
