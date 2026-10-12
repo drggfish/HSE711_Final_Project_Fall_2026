@@ -9,6 +9,8 @@ output: pdf_document
 ```{r, setup, include=FALSE, message=FALSE}
 # load tidyverse package which includes dplyr and ggplot - the two packages we will need
 library(tidyverse)
+library(ComplexHeatmap)
+library(circlize)
 
 ```
 
@@ -340,9 +342,6 @@ ggplot(df3, aes(x = treatment_method, y = mean_value, fill = Gene)) +
 ### New Heatmap
 
 ```{r}
-
-library(ComplexHeatmap)
-library(circlize)
 # Define color schemes for all annotations
 colour_list <- list(
   laterality = colorRamp2(c(18, 45, 90), c("Left" = "blue", "Right" = "orange", "NA" = "yellow")),
