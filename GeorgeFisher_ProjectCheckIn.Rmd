@@ -330,10 +330,22 @@ df3 <- count.df.subset.enriched %>%
   summarise(mean_value = mean(Counts, na.rm = TRUE))
 ```
 
-```{r}
-ggplot(df3, aes(x = treatment_method, y = mean_value, fill = Gene)) +
+```{r, message=FALSE, warning=FALSE, fig.width=8, fig.height=6, out.width="90%}
+
+df3 %>%
+  filter(!is.na(treatment_method)) %>%
+  filter(mean_value <= 10000) %>%
+ggplot(., aes(x = treatment_method, y = mean_value, fill = Gene)) +
   geom_boxplot(position = "dodge") +
-  scale_y_continuous(limits = c(0, 10000))
+  scale_y_continuous(limits = c(0, 10000)) +
+  labs(
+    title = "Distribution of BRCA1 Gene Counts by Treatment Method",
+    x = "Treatment Method",
+    y = "Counts",
+    fill = "Stage"
+  ) +
+  theme(axis.text.x = element_text(vjust = 0.5))
+
 ```
 
 
