@@ -26,7 +26,7 @@ meta_data.df <- read.csv(file = "data/meta_data.csv", header = TRUE)
 ```{r, message=FALSE}
 # Use only 5 columns of data in the meta_data dataframe to make processing faster
 metadata.modified <- meta_data.df %>%
-  dplyr::select(1,10,23,29,41) %>%
+  dplyr::select(1,10,23,29,41,86) %>%
   # The barcode variable will eventually be used to join the metadata to the count data
   # The hyphen in the barcode variable needs to be changed to a dot
   mutate(barcode = str_replace_all(barcode, "-", "."))
@@ -100,6 +100,7 @@ gene_symbols <- mapIds(
 df <- data.frame(names(gene_symbols),gene_symbols)
 
 ```
+
 ```{r, message=FALSE, warning=FALSE}
 
 # This is where I merge the previously created dataframe "df" that contains the
@@ -151,17 +152,27 @@ summary_stats
 dat.long.genes %>%
   filter(gene_symbols == 'BRCA1') %>%
   ggplot(., aes(x=Counts)) +
-    geom_histogram(alpha = 0.5, binwidth = 100) +
+    geom_histogram(alpha = 0.5, 
+                   fill = "blue", 
+                   binwidth = 100,
+                   na.rm = TRUE) +
      labs(
         title = "Distribution of BRCA1 Counts",
         x = "BRCA1 RNA-Sequencing Counts",
-        y = "Count (Frequency)"
-  )
+        y = "Count of Samples"
+     ) +
+     theme_minimal() + 
+     theme(
+       plot.title = element_text(
+         face = "bold",
+         hjust = 0.5
+       )
+     )  
   
 ```
 \newpage
 
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, fig.width=9, fig.height=6, out.width="100%}
 # b) Create a Scatter Plot: Select a second gene from the dataset. Create a scatter plot using 
 # ggplot2 to compare the count data of the two selected genes.
 
