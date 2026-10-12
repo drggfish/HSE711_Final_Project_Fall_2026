@@ -399,3 +399,79 @@ Heatmap(
 )
 
 ```
+
+### New Heatmap
+
+```{r}
+
+library(ComplexHeatmap)
+library(circlize)
+# Define color schemes for all annotations
+colour_list <- list(
+  laterality = colorRamp2(c(18, 45, 90), c("Left" = "blue", "Right" = "orange", "NA" = "yellow")),
+  sample_type = colorRamp2(c(18, 90), c("Primary Tumor" = "red","Solid Tissue Normal" = "green")),
+  #sample_type = colorRamp2(c(20, 100), c("red","green")),
+  treatment_method = c("Adjuvant" = "white", "Anastrozole" = "lightblue",
+                       "Carboplatin" = "lightpink", "First-Line Therapy" = "darkred", 
+                       "NA" = "blue")
+)
+```
+
+```{r}
+# Create top annotation for continuous variables
+top_ann <- HeatmapAnnotation(
+  Laterality = meta_data.df.corrected_2$laterality,
+  Sample_type = meta_data.df.corrected_2$sample_type,
+  
+  col = colour_list,
+     na_col = "blue",
+     gp = gpar(col = "green"),
+  
+  annotation_name_gp = gpar(fontsize = 10),
+  annotation_legend_param = list(
+    Laterality = list(title = "Laterality"),
+    Sample_type = list(title = "Sample Type")
+  )
+)
+
+# Create bottom annotation for treatment variables
+bottom_ann <- HeatmapAnnotation(
+  Treatment_Method = meta_data.df.corrected_2$treatment_method,
+  
+  col = colour_list,
+     na_col = "blue",
+     gp = gpar(col = "white"),
+
+  annotation_name_gp = gpar(fontsize = 10)
+ 
+)
+```
+
+```{r}
+# Heatmap with annotations
+annotated_heatmap <- Heatmap(
+  count.df.matrix,
+  name = "Expression",
+  
+  # Clustering parameters
+  clustering_distance_rows = "spearman",
+  clustering_method_rows = "ward.D2",
+  clustering_distance_columns = "spearman",
+  clustering_method_columns = "ward.D2",
+  
+  #col = colour_list,
+  
+  #top_annotation = top_ann,
+  bottom_annotation = bottom_ann,
+  
+  show_row_names = TRUE,
+  row_names_gp = gpar(fontsize = 8),
+  show_column_names = FALSE,
+  column_names_gp = gpar(fontsize = 8),
+  
+  column_title = "Gene Expression"
+)
+
+draw(annotated_heatmap)
+```
+
