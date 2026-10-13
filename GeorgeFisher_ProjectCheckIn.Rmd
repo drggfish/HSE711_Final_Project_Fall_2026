@@ -151,6 +151,9 @@ summary_stats
 # patient undergoes surgical resection of the primary tumor.
 # Generate a histogram using geom_histogram from ggplot2()
 
+png("images/Distribution of BRCA1 Counts.png",
+        width = 800, height = 600, res = 100)
+
 dat.long.genes %>%
   filter(gene_symbols == 'BRCA1') %>%
   ggplot(., aes(x=Counts)) +
@@ -170,7 +173,8 @@ dat.long.genes %>%
          hjust = 0.5
        )
      )  
-  
+
+dev.off()
 ```
 \newpage
 
@@ -185,6 +189,9 @@ genes.of.interest <- c('BRCA1', 'BRCA2')
 # except column 1 prior to pivoting back from the current long form of data to the wide form
 # This is required for the scatter plot.
 # Use the sample_type as the factor variable in the plot
+
+png("images/BRCA1 vs BRCA2 RNA-seq Counts.png",
+        width = 800, height = 600, res = 100)
 
 dat.long.genes %>%
   filter(gene_symbols %in% genes.of.interest) %>%
@@ -214,6 +221,7 @@ dat.long.genes %>%
                  hjust = 0.5
             ) 
   )
+dev.off()
 ```
 \newpage
 ```{r, message=FALSE, warning=FALSE, fig.width=8, fig.height=6, out.width="90%}
@@ -222,6 +230,9 @@ dat.long.genes %>%
 # distribution of count data based on the covariate. For example, if you choose 
 # “primary_diagnosis”, your plot should display a violin plot for each level 
 # in “primary_diagnosis”.
+
+png("images/Distribution of BRCA1 Gene Counts by Stage.png",
+        width = 800, height = 600, res = 100)
 
 dat.long.genes %>%
   filter(gene_symbols == 'BRCA1') %>%
@@ -254,6 +265,7 @@ dat.long.genes %>%
   annotation_logticks() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 
+dev.off()
 ```
 \newpage
 
@@ -455,6 +467,9 @@ annotated_heatmap <- Heatmap(
   column_title = "Gene Expression"
 )
 
+png("images/Gene Expression Heatmap.png",
+        width = 800, height = 600, res = 100)
 draw(annotated_heatmap)
+dev.off()
 ```
 
