@@ -330,7 +330,40 @@ df3 <- count.df.subset.enriched %>%
   summarise(mean_value = mean(Counts, na.rm = TRUE))
 ```
 
+```{r}
+
+# Generate additional covariate statistics
+covariate_summary_statistics <- count.df.subset.enriched %>%
+  filter(Gene == "BRCA1") %>%
+  filter(!is.na(treatment_method)) %>%
+  group_by(treatment_method) %>%
+  summarise(mean_value = mean(Counts, na.rm = TRUE),
+            std = sd(Counts, na.rm = TRUE),
+            var = var(Counts, na.rm = TRUE),
+            min = min(Counts, na.rm = TRUE),
+            max = max(Counts, na.rm = TRUE),
+            median = median(Counts, na.rm = TRUE))
+
+covariate_summary_statistics_data <- count.df.subset.enriched %>%
+  filter(Gene == "BRCA1") %>%
+  filter(!is.na(treatment_method)) %>%
+  group_by(treatment_method)
+
+model1 <- lm(Counts ~ treatment_method, covariate_summary_statistics_data)
+print(covariate_summary_statistics)
+summary(model1)
+anova_model <- aov(model1)
+
+tukey_results <- TukeyHSD(anova_model)
+print(tukey_results)
+
+```
+
+
 ```{r, message=FALSE, warning=FALSE, fig.width=8, fig.height=6, out.width="90%}
+
+#png("images/Distribution of BRCA1 Gene Counts by Treatment Method.png",
+#        width = 800, height = 600, res = 100)
 
 df3 %>%
   filter(!is.na(treatment_method)) %>%
@@ -346,9 +379,8 @@ ggplot(., aes(x = treatment_method, y = mean_value, fill = Gene)) +
   ) +
   theme(axis.text.x = element_text(vjust = 0.5))
 
+# dev.off()
 ```
-
-
 \newpage
 
 ### New Heatmap
