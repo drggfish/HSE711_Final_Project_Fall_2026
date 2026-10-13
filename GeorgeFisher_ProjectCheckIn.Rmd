@@ -346,18 +346,20 @@ df3 <- count.df.subset.enriched %>%
 
 # Generate additional covariate statistics
 covariate_summary_statistics <- count.df.subset.enriched %>%
-  filter(Gene == "BRCA1") %>%
+  filter(Gene == "ATM") %>%
   filter(!is.na(treatment_method)) %>%
+  filter(Counts <= 25000) %>%
   group_by(treatment_method) %>%
   summarise(mean_value = mean(Counts, na.rm = TRUE),
-            std = sd(Counts, na.rm = TRUE),
-            var = var(Counts, na.rm = TRUE),
             min = min(Counts, na.rm = TRUE),
             max = max(Counts, na.rm = TRUE),
-            median = median(Counts, na.rm = TRUE))
+            mean = mean(Counts, na.rm = TRUE),
+            median = median(Counts, na.rm = TRUE),
+            std = sd(Counts, na.rm = TRUE))
 
 covariate_summary_statistics_data <- count.df.subset.enriched %>%
-  filter(Gene == "BRCA1") %>%
+  filter(Gene == "ATM") %>%
+  filter(Counts <= 25000) %>%
   filter(!is.na(treatment_method)) %>%
   group_by(treatment_method)
 
@@ -365,6 +367,7 @@ model1 <- lm(Counts ~ treatment_method, covariate_summary_statistics_data)
 print(covariate_summary_statistics)
 summary(model1)
 anova_model <- aov(model1)
+summary(anova_model)
 
 tukey_results <- TukeyHSD(anova_model)
 print(tukey_results)
@@ -379,12 +382,12 @@ print(tukey_results)
 
 df3 %>%
   filter(!is.na(treatment_method)) %>%
-  filter(mean_value <= 10000) %>%
+  filter(mean_value <= 25000) %>%
 ggplot(., aes(x = treatment_method, y = mean_value, fill = Gene)) +
   geom_boxplot(position = "dodge") +
-  scale_y_continuous(limits = c(0, 10000)) +
+  scale_y_continuous(limits = c(0, 22000)) +
   labs(
-    title = "Distribution of BRCA1 Gene Counts by Treatment Method",
+    title = "Distribution Gene Counts by Treatment Method",
     x = "Treatment Method",
     y = "Counts",
     fill = "Stage"
