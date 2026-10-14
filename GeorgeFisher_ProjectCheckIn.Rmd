@@ -67,11 +67,7 @@ dat.long.enriched <- dat.long %>%
 
 ```{r, message=FALSE, warning=FALSE}
 
-# This code block is "experimental and will take additional work prior to submitting
-# the final project. I wanted to be able to map the Ensembl IDs to their actual gene symbol
-# I found the example on Google and have it working in my code. There are still some
-# issues I need to resolve but overall, for several of the following plots - this
-# translation makes a big difference.
+# This code block is used to map the Ensembl IDs to their actual gene symbol.
 
 # Load required libraries
 library(AnnotationDbi) # provides an R interface to query SQLite-based biological 
@@ -199,7 +195,7 @@ dat.long.genes %>%
   pivot_wider(names_from = gene_symbols, values_from = Counts) %>%
   filter(!is.na(paper_BRCA_Subtype_PAM50)) %>%
   ggplot(., aes(x = BRCA1,y = BRCA2)) +
-  geom_point(aes(colour = factor(paper_BRCA_Subtype_PAM50)), size = 1,
+  geom_point(aes(colour = factor(paper_BRCA_Subtype_PAM50)),
              alpha = 0.5, 
              size = 2, 
              na.rm = TRUE) +
@@ -299,6 +295,10 @@ rownames(count.df.subset) <- gene_name
 ```
 
 ```{r, message=FALSE, warning=FALSE}
+library(dplyr)
+library(conflicted)
+conflict_prefer("select", "dplyr")
+
 count.df.subset %>% 
   mutate(row_mean = rowMeans(select(., where(is.numeric)), na.rm = TRUE)) %>%
   select(last_col())
@@ -344,6 +344,8 @@ df3 <- count.df.subset.enriched %>%
 
 ```{r}
 
+conflict_prefer("filter", "dplyr")
+
 # Generate additional covariate statistics
 covariate_summary_statistics <- count.df.subset.enriched %>%
   filter(Gene == "ATM") %>%
@@ -377,8 +379,8 @@ print(tukey_results)
 
 ```{r, message=FALSE, warning=FALSE, fig.width=8, fig.height=6, out.width="90%}
 
-#png("images/Distribution of BRCA1 Gene Counts by Treatment Method.png",
-#        width = 800, height = 600, res = 100)
+png("images/Distribution of BRCA1 Gene Counts by Treatment Method.png",
+        width = 800, height = 600, res = 100)
 
 df3 %>%
   filter(!is.na(treatment_method)) %>%
@@ -394,7 +396,7 @@ ggplot(., aes(x = treatment_method, y = mean_value, fill = Gene)) +
   ) +
   theme(axis.text.x = element_text(vjust = 0.5))
 
-# dev.off()
+dev.off()
 ```
 \newpage
 
