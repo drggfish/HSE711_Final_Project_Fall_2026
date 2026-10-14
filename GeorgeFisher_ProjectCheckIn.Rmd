@@ -120,6 +120,11 @@ will be required when we create the heat map
 # BRCA1 is a human tumor suppressor genes that normally produce proteins to repair damaged 
 # DNA and prevent uncontrolled cell growth
 
+get_mode <- function(x) {
+  uniq_x <- unique(x)
+  uniq_x[which.max(tabulate(match(x, uniq_x)))]
+}
+
 # Using dplyr filter out only BRCA1 and do summary statistics
 summary_stats <- dat.long.genes %>%
   filter(gene_symbols == 'BRCA1') %>%
@@ -128,6 +133,7 @@ summary_stats <- dat.long.genes %>%
     max = max(Counts, na.rm = TRUE),
     mean = mean(Counts, na.rm = TRUE),
     median = median(Counts, na.rm = TRUE),
+    mode = get_mode(Counts),
     sd = sd(Counts, na.rm = TRUE)
   )
 summary_stats
@@ -342,7 +348,7 @@ df3 <- count.df.subset.enriched %>%
   summarise(mean_value = mean(Counts, na.rm = TRUE))
 ```
 
-```{r}
+```{r, size="tiny"}
 
 conflict_prefer("filter", "dplyr")
 
@@ -357,6 +363,7 @@ covariate_summary_statistics <- count.df.subset.enriched %>%
             max = max(Counts, na.rm = TRUE),
             mean = mean(Counts, na.rm = TRUE),
             median = median(Counts, na.rm = TRUE),
+            mode = get_mode(Counts),
             std = sd(Counts, na.rm = TRUE))
 
 covariate_summary_statistics_data <- count.df.subset.enriched %>%
