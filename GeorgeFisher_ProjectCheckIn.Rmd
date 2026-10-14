@@ -366,11 +366,20 @@ covariate_summary_statistics_data <- count.df.subset.enriched %>%
   group_by(treatment_method)
 
 model1 <- lm(Counts ~ treatment_method, covariate_summary_statistics_data)
+cat("\n")
+cat("ATM Gene Covariate Summary Statistics.\n")
+cat("\n")
 print(covariate_summary_statistics)
+cat("\n")
+cat("LM Model Summary.\n")
 summary(model1)
+cat("\n")
+cat("Anova Summary.\n")
 anova_model <- aov(model1)
 summary(anova_model)
-
+cat("\n")
+cat("Tukey HSD Results.\n")
+cat("\n")
 tukey_results <- TukeyHSD(anova_model)
 print(tukey_results)
 
@@ -414,13 +423,10 @@ heatmap_colors <- colorRamp2(
 ```{r}
 # Define color schemes for all annotations
 colour_list <- list(
-  laterality = colorRamp2(c(18, 45, 90), 
-                          c("Left" = "blue", "Right" = "orange", "NA" = "yellow")),
-  sample_type = colorRamp2(c(18, 90), c("Primary Tumor" = "red",
-                                        "Solid Tissue Normal" = "green")),
-  treatment_method = c("Adjuvant" = "white", "Anastrozole" = "lightblue",
-                       "Carboplatin" = "lightpink", "First-Line Therapy" = "darkred", 
-                       "NA" = "blue")
+  laterality <- c("Left" = "blue", "Right" = "orange")
+  #sample_type = col2rgb(unname(c("Primary Tumor" = "red", "Solid Tissue Normal" = "green"))),
+  #treatment_method = col2rgb(unname(c("Adjuvant" = "white", "Anastrozole" = "red",
+  #                     "Carboplatin" = "green", "First-Line Therapy" = "blue")))
 )
 ```
 
@@ -435,6 +441,7 @@ top_ann <- HeatmapAnnotation(
     Laterality = list(title = "Laterality"),
     Sample_type = list(title = "Sample Type")
   )
+  #colour_list = list(laterality = Laterality)
 )
 
 # Create bottom annotation for treatment variables
@@ -452,6 +459,7 @@ annotated_heatmap <- Heatmap(
   count.df.matrix,
   name = "Expression",
   
+  #col = colour_list,
   # Clustering parameters
   clustering_distance_rows = "spearman",
   clustering_method_rows = "ward.D2",
