@@ -452,10 +452,10 @@ ggplot(., aes(x = treatment_method, y = mean_value, fill = Gene)) +
   geom_boxplot(position = "dodge") +
   scale_y_continuous(limits = c(0, 22000)) +
   labs(
-    title = "Distribution Gene Counts by Treatment Method",
+    title = "Distribution of Gene Counts by Treatment Method",
     x = "Treatment Method",
     y = "Counts",
-    fill = "Stage"
+    fill = "Gene"
   ) +
   theme(axis.text.x = element_text(vjust = 0.5))
 
