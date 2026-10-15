@@ -233,41 +233,41 @@ dev.off()
 # “primary_diagnosis”, your plot should display a violin plot for each level 
 # in “primary_diagnosis”.
 
-png("images/Distribution of BRCA1 Gene Counts by Stage.png",
-        width = 800, height = 600, res = 100)
+#png("images/Distribution of BRCA1 Gene Counts by Sample_type.png",
+#        width = 800, height = 600, res = 100)
 
 dat.long.genes %>%
   filter(gene_symbols == 'BRCA1') %>%
-  filter(!is.na(ajcc_pathologic_stage)) %>%
-  ggplot(., aes(x=ajcc_pathologic_stage,y=Counts, fill = ajcc_pathologic_stage)) +
+  filter(!is.na(sample_type)) %>%
+  ggplot(., aes(x=sample_type,y=Counts, fill = sample_type)) +
   geom_violin(alpha = 0.6) +  #Legend title) +
-  scale_fill_manual(
-    values = c(
-      "Stage 0" = "aliceblue",
-      "Stage I" = "antiquewhite",
-      "Stage IA" = "aquamarine",
-      "Stage IB" = "azure3",
-      "Stage II" = "bisque4",
-      "Stage IIA" = "brown1",
-      "Stage IIB" = "cornflowerblue",
-      "Stage IIIA" = "darkgreen",
-      "Stage IIIB" = "darksalmon",
-      "Stage IIIC" = "deeppink",
-      "Stage IV" = "deepskyblue1",
-      "Stage X" = "darkorange"
-    ) 
-  ) +
+  #scale_fill_manual(
+  #  values = c(
+  #    "Stage 0" = "aliceblue",
+  #    "Stage I" = "antiquewhite",
+  #    "Stage IA" = "aquamarine",
+  #    "Stage IB" = "azure3",
+  #    "Stage II" = "bisque4",
+  #    "Stage IIA" = "brown1",
+  #    "Stage IIB" = "cornflowerblue",
+  #    "Stage IIIA" = "darkgreen",
+  #    "Stage IIIB" = "darksalmon",
+  #    "Stage IIIC" = "deeppink",
+  #    "Stage IV" = "deepskyblue1",
+  #    "Stage X" = "darkorange"
+  #  ) 
+  #) +
   labs(
-    title = "Distribution of BRCA1 Gene Counts by Stage",
-    x = "AJCC Pathological Stage",
+    title = "Distribution of BRCA1 Gene Counts by Sample Type",
+    x = "Sample Type",
     y = "Counts",
-    fill = "Stage"
+    fill = "Sample Type"
   ) +
   scale_y_log10(labels = scales::comma) +
   annotation_logticks() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 
-dev.off()
+#dev.off()
 ```
 \newpage
 
@@ -354,10 +354,10 @@ conflict_prefer("filter", "dplyr")
 
 # Generate additional covariate statistics
 covariate_summary_statistics <- count.df.subset.enriched %>%
-  filter(Gene == "ATM") %>%
+  filter(Gene == "BRCA1") %>%
   filter(!is.na(treatment_method)) %>%
   filter(Counts <= 25000) %>%
-  group_by(treatment_method) %>%
+  group_by(sample_type) %>%
   summarise(mean_value = mean(Counts, na.rm = TRUE),
             min = min(Counts, na.rm = TRUE),
             max = max(Counts, na.rm = TRUE),
@@ -367,12 +367,12 @@ covariate_summary_statistics <- count.df.subset.enriched %>%
             std = sd(Counts, na.rm = TRUE))
 
 covariate_summary_statistics_data <- count.df.subset.enriched %>%
-  filter(Gene == "ATM") %>%
+  filter(Gene == "BRCA1") %>%
   filter(Counts <= 25000) %>%
-  filter(!is.na(treatment_method)) %>%
-  group_by(treatment_method)
+  filter(!is.na(sample_type)) #%>%
+  #group_by(treatment_method)
 
-model1 <- lm(Counts ~ treatment_method, covariate_summary_statistics_data)
+model1 <- lm(Counts ~ sample_type, covariate_summary_statistics_data)
 cat("\n")
 cat("ATM Gene Covariate Summary Statistics.\n")
 cat("\n")
