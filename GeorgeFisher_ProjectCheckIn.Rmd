@@ -129,17 +129,64 @@ get_mode <- function(x) {
 summary_stats <- dat.long.genes %>%
   filter(gene_symbols == 'BRCA1') %>%
   summarize(
+    mean = mean(Counts, na.rm = TRUE),
     min = min(Counts, na.rm = TRUE),
     max = max(Counts, na.rm = TRUE),
-    mean = mean(Counts, na.rm = TRUE),
     median = median(Counts, na.rm = TRUE),
     mode = get_mode(Counts),
     sd = sd(Counts, na.rm = TRUE)
   )
+
 summary_stats
   
 
 ```
+```{r}
+# BRCA2 Summary Statistics
+
+get_mode <- function(x) {
+  uniq_x <- unique(x)
+  uniq_x[which.max(tabulate(match(x, uniq_x)))]
+}
+
+# Using dplyr filter out only BRCA1 and do summary statistics
+summary_stats <- dat.long.genes %>%
+  filter(gene_symbols == 'BRCA2') %>%
+  summarize(
+    mean = mean(Counts, na.rm = TRUE),
+    min = min(Counts, na.rm = TRUE),
+    max = max(Counts, na.rm = TRUE),
+    median = median(Counts, na.rm = TRUE),
+    mode = get_mode(Counts),
+    sd = sd(Counts, na.rm = TRUE)
+  )
+
+summary_stats
+```
+
+```{r}
+# ATM Summary Statistics
+
+get_mode <- function(x) {
+  uniq_x <- unique(x)
+  uniq_x[which.max(tabulate(match(x, uniq_x)))]
+}
+
+# Using dplyr filter out only BRCA1 and do summary statistics
+summary_stats <- dat.long.genes %>%
+  filter(gene_symbols == 'ATM') %>%
+  summarize(
+    mean = mean(Counts, na.rm = TRUE),
+    min = min(Counts, na.rm = TRUE),
+    max = max(Counts, na.rm = TRUE),
+    median = median(Counts, na.rm = TRUE),
+    mode = get_mode(Counts),
+    sd = sd(Counts, na.rm = TRUE)
+  )
+
+summary_stats
+```
+
 \newpage
 
 ## 3) Visualization
@@ -233,8 +280,8 @@ dev.off()
 # “primary_diagnosis”, your plot should display a violin plot for each level 
 # in “primary_diagnosis”.
 
-#png("images/Distribution of BRCA1 Gene Counts by Sample_type.png",
-#        width = 800, height = 600, res = 100)
+png("images/Distribution of BRCA1 Gene Counts by Sample_type.png",
+        width = 800, height = 600, res = 100)
 
 dat.long.genes %>%
   filter(gene_symbols == 'BRCA1') %>%
@@ -267,7 +314,7 @@ dat.long.genes %>%
   annotation_logticks() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 
-#dev.off()
+dev.off()
 ```
 \newpage
 
