@@ -119,10 +119,10 @@ will be required when we create the heat map
 
 ```{r, Q2}
 
-# I am choosing the gene BRCA1 to study
-# BRCA1 is a human tumor suppressor genes that normally produce proteins to repair damaged 
-# DNA and prevent uncontrolled cell growth
+# I am choosing the genes BRCA1, BRCA2 and ATM to study
+# The next 3 chunks are calculating summary statistics for each gene
 
+# Function to calculate the mode 
 get_mode <- function(x) {
   uniq_x <- unique(x)
   uniq_x[which.max(tabulate(match(x, uniq_x)))]
@@ -147,12 +147,13 @@ summary_stats
 ```{r}
 # BRCA2 Summary Statistics
 
+# Function to calculate the mode
 get_mode <- function(x) {
   uniq_x <- unique(x)
   uniq_x[which.max(tabulate(match(x, uniq_x)))]
 }
 
-# Using dplyr filter out only BRCA1 and do summary statistics
+# Using dplyr filter out only BRCA2 and do summary statistics
 summary_stats <- dat.long.genes %>%
   filter(gene_symbols == 'BRCA2') %>%
   summarize(
@@ -170,12 +171,13 @@ summary_stats
 ```{r}
 # ATM Summary Statistics
 
+# Function to calculate the mode
 get_mode <- function(x) {
   uniq_x <- unique(x)
   uniq_x[which.max(tabulate(match(x, uniq_x)))]
 }
 
-# Using dplyr filter out only BRCA1 and do summary statistics
+# Using dplyr filter out only ATM and do summary statistics
 summary_stats <- dat.long.genes %>%
   filter(gene_symbols == 'ATM') %>%
   summarize(
@@ -306,6 +308,8 @@ dat.long.genes %>%
 \newpage
 
 ```{r, DataLoad, message=FALSE, warning=FALSE}
+# Reload data to do further data wrangling
+
 count.df <- read.csv(file = "data/counts.csv", header = TRUE,row.names = 1)
 meta_data.df <- read.csv(file = "data/meta_data.csv", header = TRUE)
 ```
@@ -319,9 +323,11 @@ genes.of.interest <- c("ENSG00000012048.23","ENSG00000139618.16",
                        "ENSG00000136492.9", "ENSG00000149311.19",
                        "ENSG00000183765.23", "ENSG00000167258.15")
 
+# common gene names to be used to rename the ensambl ID
 gene_name <- c("BRCA1", "BRCA2", "PALB2", "BARD1", "RAD51C",
                 "RAD51D", "BRIP1", "ATM", "CHEK2", "CDK12")
 
+# Data wrangling to create new count matrix for heatmap generation
 count.df.subset <- count.df %>%
   filter(rownames(.) %in% genes.of.interest)
 
@@ -340,12 +346,15 @@ library(dplyr)
 library(conflicted)
 conflict_prefer("select", "dplyr")
 
+# Calculate mean of each row - will correspond to the mean counts of each gene
 count.df.subset %>% 
   mutate(row_mean = rowMeans(select(., where(is.numeric)), na.rm = TRUE)) %>%
   select(last_col())
 ```
 
 ```{r, message=FALSE, warning=FALSE}
+# convert from wide to long for next stages
+
 count.df.subset.long <- count.df.subset %>%
   tibble::rownames_to_column(var = "Gene") %>% 
   pivot_longer(
@@ -367,12 +376,17 @@ meta_data.df.corrected_2 <- meta_data.df %>%
 
 
 ```{r, message=FALSE, warning=FALSE}
+# correcting the barcode so for the join with the metadata in a subsequent chunk
 meta_data.df.corrected_2 <- meta_data.df.corrected_2 %>% mutate(barcode = str_replace_all(barcode, "-", "."))
 
+# arrange by treatment_method
 meta_data.df.corrected_2 %>% arrange(treatment_method)
 ```
 
 ```{r, message=FALSE, warning=FALSE}
+
+# merge count and metadata
+
 count.df.subset.enriched <- count.df.subset.long %>%
   inner_join(., meta_data.df.corrected_2, by = c("Sample" = "barcode"))
 ```
@@ -433,6 +447,7 @@ print(tukey_results)
 #png("images/Distribution of BRCA1 Gene Counts by Treatment Method.png",
 #        width = 800, height = 600, res = 100)
 
+# generate a boxplot of counts by treatment_method
 df3 %>%
   filter(!is.na(treatment_method)) %>%
   filter(mean_value <= 25000) %>%
@@ -454,6 +469,7 @@ ggplot(., aes(x = treatment_method, y = mean_value, fill = Gene)) +
 ### New Heatmap
 
 ```{r}
+# color for scale of counts - red is highest
 heatmap_colors <- colorRamp2(
   c(-2,0,2),
   c("#2166AC", "white", "#B2182B")
