@@ -9,7 +9,7 @@ output:
 ---
 
 
-```{r, setup, include=FALSE, message=FALSE}
+```{r, setup, warning = FALSE, message=FALSE}
 # load tidyverse package which includes dplyr and ggplot - the two packages we will need
 library(tidyverse)
 library(ComplexHeatmap)
