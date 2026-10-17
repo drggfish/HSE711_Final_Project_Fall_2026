@@ -332,6 +332,7 @@ rownames(count.df.matrix) <- gene_name
 
 rownames(count.df.subset) <- gene_name
 
+<<<<<<< HEAD
 ```
 
 ```{r, message=FALSE, warning=FALSE}
@@ -527,3 +528,6 @@ draw(annotated_heatmap)
 #dev.off()
 ```
 
+=======
+```
+>>>>>>> 43b00828ba5939f0c50a2fbdbbea4f8296861bd3
