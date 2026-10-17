@@ -8,3 +8,5 @@ data
 .long
 .enriched
 .genes
+.log
+.tex
