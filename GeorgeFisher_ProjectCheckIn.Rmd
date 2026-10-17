@@ -332,7 +332,7 @@ rownames(count.df.matrix) <- gene_name
 
 rownames(count.df.subset) <- gene_name
 
-<<<<<<< HEAD
+
 ```
 
 ```{r, message=FALSE, warning=FALSE}
