@@ -482,9 +482,6 @@ heatmap_colors <- colorRamp2(
 # Define color schemes for all annotations
 colour_list <- list(
   laterality <- c("Left" = "blue", "Right" = "orange")
-  #sample_type = col2rgb(unname(c("Primary Tumor" = "red", "Solid Tissue Normal" = "green"))),
-  #treatment_method = col2rgb(unname(c("Adjuvant" = "white", "Anastrozole" = "red",
-  #                     "Carboplatin" = "green", "First-Line Therapy" = "blue")))
 )
 ```
 
